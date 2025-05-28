@@ -1,0 +1,45 @@
+[Unit]
+Description=TON API Indexer - Continuous blockchain indexing service
+Documentation=https://github.com/ton-foundation/ton-api-indexing
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=user
+Group=user
+WorkingDirectory=/home/user/ton-api-indexing
+Environment=NODE_ENV=production
+
+# Основная команда - infinite режим
+ExecStart=/usr/bin/node dist/index.js infinite
+
+# Перезапуск при сбоях
+Restart=always
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=5
+
+# Graceful shutdown
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# Логирование
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ton-indexer
+
+# Безопасность (опционально)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/home/user/ton-api-indexing/data /home/user/ton-api-indexing/logs
+
+# Переменные окружения (альтернатива .env файлу)
+# Environment=TONAPI_KEY=your_api_key_here
+# Environment=LOG_LEVEL=info
+# Environment=MAX_CONCURRENT_REQUESTS=2
+
+[Install]
+WantedBy=multi-user.target 
