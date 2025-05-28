@@ -1,0 +1,15 @@
+{
+  "code": "b5ee9c7201010801007c000114ff00f4a413f4bcf2c80b01020120020302014804050080f28308d71820f90101d31fd31fd31f02f823bbf263ed44d0d31fd31fd70bff541677f910f2a366baf2a15123baf2a2f800d74ced55a4c8cb1fcb1fcbffc9ed540004d03002014806070019bb39ced44d08040d721d70bff80011b8c97ed44d0d70b1f8",
+  "code_hash": "d4c62bba5b0a47643dbdeef1ae9035f5d02b5cccff70fcda2900a258bc820785",
+  "methods": [
+    {
+      "id": 78748,
+      "method": "get_public_key"
+    },
+    {
+      "id": 85143,
+      "method": "seqno"
+    }
+  ],
+  "compiler": "func"
+}
