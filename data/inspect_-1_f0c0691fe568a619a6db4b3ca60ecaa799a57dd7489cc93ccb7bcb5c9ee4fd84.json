@@ -1,0 +1,17 @@
+{
+  "code": "b5ee9c7201010101002300084202587cc789eff1c84f46ec3797e45fc809a14ff5ae24f1e0c7a6a99cc9dc9061ff",
+  "code_hash": "4c03fd2af2544868b272d5397aa9b0d77f9faa3618530443965b8afb62b9c201",
+  "methods": [],
+  "compiler": "fift",
+  "source": {
+    "files": [
+      {
+        "name": "wallet_v1_r3.fif",
+        "content": "#!/usr/bin/fift -s\n\"TonUtil.fif\" include\n\"Asm.fif\" include\n<{ SETCP0 DUP IFNOTRET // return if recv_internal\n   DUP 85143 INT EQUAL OVER 78748 INT EQUAL OR IFJMP:<{ // \"seqno\" and \"get_public_key\" get-methods\n     1 INT AND c4 PUSHCTR CTOS 32 LDU 256 PLDU CONDSEL  // cnt or pubk\n   }>\n   INC 32 THROWIF  // fail unless recv_external\n   512 INT LDSLICEX DUP 32 PLDU   // sign cs cnt\n   c4 PUSHCTR CTOS 32 LDU 256 LDU ENDS  // sign cs cnt cnt' pubk\n   s1 s2 XCPU            // sign cs cnt pubk cnt' cnt\n   EQUAL 33 THROWIFNOT   // ( seqno mismatch? )\n   s2 PUSH HASHSU        // sign cs cnt pubk hash\n   s0 s4 s4 XC2PU        // pubk cs cnt hash sign pubk\n   CHKSIGNU              // pubk cs cnt ?\n   34 THROWIFNOT         // signature mismatch\n   ACCEPT\n   SWAP 32 LDU NIP\n   DUP SREFS IF:<{\n     // 3 INT 35 LSHIFT# 3 INT RAWRESERVE    // reserve all but 103 Grams from the balance\n     8 LDU LDREF         // pubk cnt mode msg cs\n     s0 s2 XCHG SENDRAWMSG  // pubk cnt cs ; ( message sent )\n   }>\n   ENDS\n   INC NEWC 32 STU 256 STU ENDC c4 POPCTR\n}>c",
+        "is_entrypoint": false,
+        "is_std_lib": false,
+        "include_in_command": false
+      }
+    ]
+  }
+}
