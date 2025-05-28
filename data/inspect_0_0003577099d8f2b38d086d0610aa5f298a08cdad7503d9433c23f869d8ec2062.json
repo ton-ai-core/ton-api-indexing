@@ -1,0 +1,11 @@
+{
+  "code": "b5ee9c7201010401002c000114ff00f4a413f4bcf2c80b0102016202030002d00029a11f9fda89a1f481a860e191960392fee005a08087",
+  "code_hash": "a29127c0a94ff10b0fc5ea78a6554d99309105480f11f5853516da315c3389b6",
+  "methods": [
+    {
+      "id": 102351,
+      "method": "get_nft_data"
+    }
+  ],
+  "compiler": "func"
+}
