@@ -1,0 +1,11 @@
+{
+  "code": "b5ee9c7201010101002300084202742610640d2b2cd87d86b3834533a6922d3b71c9b639fe38837ec466dcc0bcbb",
+  "code_hash": "10e8de1ab0e9e32b13884dc83ccf0c284851f0d7615567f3223eff6e66508487",
+  "methods": [
+    {
+      "id": 97026,
+      "method": "get_wallet_data"
+    }
+  ],
+  "compiler": "func"
+}
