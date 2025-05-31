@@ -1,0 +1,19 @@
+{
+  "code": "b5ee9c7201010a01009e000114ff00f4a413f4bcf2c80b0102016202030202ce04050201200607007b4f0025b71821005138d917020c85005cf1614ca00413073708010c8cb055007cf165005fa0215cb6a12cb1fcb3f226eb39458cf17019132e201c901fb00800154ed44d0fa40fa40d4d430802015808090023bc7e7f8011818b8646580e4bfb801682021c001db5dafe004d863a1a61fa61ff4806100011b40e9e0042046be070",
+  "code_hash": "e201339c1da9b322ed4ff6289cbad71dfc303417cc66fbafae7052fa7da66572",
+  "methods": [
+    {
+      "id": 85719,
+      "method": "royalty_params"
+    },
+    {
+      "id": 90228,
+      "method": "get_editor"
+    },
+    {
+      "id": 102351,
+      "method": "get_nft_data"
+    }
+  ],
+  "compiler": "func"
+}
