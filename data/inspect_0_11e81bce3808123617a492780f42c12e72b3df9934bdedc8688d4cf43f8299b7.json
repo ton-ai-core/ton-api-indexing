@@ -1,0 +1,27 @@
+{
+  "code": "b5ee9c72010101010023000842022498bd63f3e9cc2c20c79abe58899a4816ea156855b8d4fcd47cda4bae9e911a",
+  "code_hash": "8b711e6809672c0335dc61d1da1dcc4059c973248af707bd586245085ea70b32",
+  "methods": [
+    {
+      "id": 102351,
+      "method": "get_nft_data"
+    },
+    {
+      "id": 69506,
+      "method": "get_telemint_token_name"
+    },
+    {
+      "id": 85719,
+      "method": "royalty_params"
+    },
+    {
+      "id": 122498,
+      "method": "get_telemint_auction_state"
+    },
+    {
+      "id": 129619,
+      "method": "get_telemint_auction_config"
+    }
+  ],
+  "compiler": "func"
+}
