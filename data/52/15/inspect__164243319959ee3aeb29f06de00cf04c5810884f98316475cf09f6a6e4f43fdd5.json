@@ -1,0 +1,11 @@
+{
+  "code": "b5ee9c72010106010060000114ff00f4a413f4a0f2c80b01020120020302014804050070f28308d71820d31fed44d0d31fd3ffd15131baf2a103f901541042f910f2a2f800029320d74a96d307d402fb00e8d1a4c8cb1fcbffc9ed540004d0300011a0992fda89a1ae163f",
+  "code_hash": "619c51fddcc1be5df14b00a840d00a27b58b392fe1efedfbe256c7767a00cb18",
+  "methods": [
+    {
+      "id": 85143,
+      "method": "seqno"
+    }
+  ],
+  "compiler": "func"
+}

@@ -1,0 +1,19 @@
+{
+  "code": "b5ee9c7201010101002300084202b79bd205f18c356092a907ca31fe0e379bde1b86a4caf36d8797849038ab2a7a",
+  "code_hash": "9e2923274fd83860d5b9ad4bb34f2a6da3c93f0b25f0ae973abf27c6df359f8f",
+  "methods": [
+    {
+      "id": 84760,
+      "method": "get_authority_address"
+    },
+    {
+      "id": 97667,
+      "method": "get_revoked_time"
+    },
+    {
+      "id": 102351,
+      "method": "get_nft_data"
+    }
+  ],
+  "compiler": "func"
+}

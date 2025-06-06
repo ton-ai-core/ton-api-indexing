@@ -1,0 +1,17 @@
+{
+  "code": "b5ee9c720101010100630000c2ff0020dd2082014c97ba218201339cbab19c71b0ed44d0d31fd70bffe304e0a4f2608308d71820d31fd31f01f823bbf263ed44d0d31fd3ffd15131baf2a103f901541042f910f2a2f800029320d74a96d307d402fb00e8d1a4c8cb1fcbffc9ed54",
+  "code_hash": "fe9530d3243853083ef2ef0b4c2908c0abf6fa1c31ea243aacaa5bf8c7d753f1",
+  "methods": [],
+  "compiler": "fift",
+  "source": {
+    "files": [
+      {
+        "name": "wallet_v2_r2.fif",
+        "content": "\"TonUtil.fif\" include\n\"Asm.fif\" include\n<{ SETCP0 DUP IFNOTRET // return if recv_internal\n   DUP 85143 INT EQUAL OVER 78748 INT EQUAL OR IFJMP:<{ // \"seqno\" and \"get_public_key\" get-methods\n     1 INT AND c4 PUSHCTR CTOS 32 LDU 256 PLDU CONDSEL  // cnt or pubk\n   }>\n   INC 32 THROWIF\t// fail unless recv_external\n   9 PUSHPOW2 LDSLICEX DUP 32 LDU 32 LDU\t//  signature in_msg msg_seqno valid_until cs\n   SWAP NOW LEQ 35 THROWIF\t//  signature in_msg msg_seqno cs\n   c4 PUSH CTOS 32 LDU 256 LDU ENDS\t//  signature in_msg msg_seqno cs stored_seqno public_key\n   s3 s1 XCPU\t//  signature in_msg public_key cs stored_seqno msg_seqno stored_seqno\n   EQUAL 33 THROWIFNOT\t//  signature in_msg public_key cs stored_seqno\n   s0 s3 XCHG HASHSU\t//  signature stored_seqno public_key cs hash\n   s0 s4 s2 XC2PU CHKSIGNU 34 THROWIFNOT\t//  cs stored_seqno public_key\n   ACCEPT\n   s0 s2 XCHG\t//  public_key stored_seqno cs\n   WHILE:<{\n     DUP SREFS\t//  public_key stored_seqno cs _40\n   }>DO<{\t//  public_key stored_seqno cs\n     // 3 INT 35 LSHIFT# 3 INT RAWRESERVE    // reserve all but 103 Grams from the balance\n     8 LDU LDREF s0 s2 XCHG\t//  public_key stored_seqno cs _45 mode\n     SENDRAWMSG\t//  public_key stored_seqno cs\n   }>\n   ENDS INC\t//  public_key seqno'\n   NEWC 32 STU 256 STU ENDC c4 POP\n}>c",
+        "is_entrypoint": false,
+        "is_std_lib": false,
+        "include_in_command": false
+      }
+    ]
+  }
+}

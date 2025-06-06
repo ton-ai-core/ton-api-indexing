@@ -1,0 +1,11 @@
+{
+  "code": "b5ee9c7201010101002300084202bb56d306f539c9f3d1d8c1cd1aef0509d5cf4c9b9b18f02e3fe2c9d91bf05b7e",
+  "code_hash": "4993da0f3c8d0d4b0bcdabd9fdea93cba3534d1d5aaf03ce4b033382e51acc68",
+  "methods": [
+    {
+      "id": 119995,
+      "method": "get_position_manager_contract_data"
+    }
+  ],
+  "compiler": "func"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "b5ee9c720101010100230008420208c662c800a9c1ea0e6a13cb7be392fef19ed69e2c2805d83ef3612db8bbaf29",
+  "code_hash": "5c6e7c3464374bc3b2d199669e68bd9bf9f353c927908fab74e605d0f3aec17d",
+  "methods": [
+    {
+      "id": 102491,
+      "method": "get_collection_data"
+    }
+  ],
+  "compiler": "func"
+}

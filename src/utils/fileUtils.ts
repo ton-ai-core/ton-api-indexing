@@ -1,6 +1,12 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { Logger } from './logger';
+import { 
+  prepareFilePath, 
+  getFilePath, 
+  calculateOptimalDirectoryLevels,
+  analyzeDirectoryDistribution 
+} from './directoryStructure';
 
 /**
  * Read cursor from file
@@ -42,43 +48,46 @@ export function generateFileName(rawAddress: string): string {
 }
 
 /**
- * Check if contract file already exists
+ * Check if contract file already exists (with hierarchical directory support)
  */
-export async function contractFileExists(dataDirectory: string, rawAddress: string): Promise<boolean> {
-  const fileName = generateFileName(rawAddress);
-  const filePath = path.join(dataDirectory, fileName);
+export async function contractFileExists(
+  dataDirectory: string, 
+  rawAddress: string,
+  directoryLevels?: number
+): Promise<boolean> {
+  const filePath = getFilePath(rawAddress, dataDirectory, directoryLevels);
   return fs.pathExists(filePath);
 }
 
 /**
- * Save contract inspect data to JSON file
+ * Save contract inspect data to JSON file (with hierarchical directory support)
  */
 export async function saveContractData(
   dataDirectory: string,
   rawAddress: string,
   data: any,
-  logger: Logger
+  logger: Logger,
+  directoryLevels?: number
 ): Promise<string> {
   try {
-    await fs.ensureDir(dataDirectory);
-    
-    const fileName = generateFileName(rawAddress);
-    const filePath = path.join(dataDirectory, fileName);
+    // Используем новую систему иерархических папок
+    const filePath = await prepareFilePath(rawAddress, dataDirectory, directoryLevels);
     
     await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
     
     logger.debug({ 
       address: rawAddress, 
-      fileName, 
-      filePath 
-    }, 'Saved contract data');
+      filePath,
+      directoryLevels: directoryLevels || 'auto'
+    }, 'Saved contract data to hierarchical structure');
     
     return filePath;
   } catch (error) {
     logger.error({ 
       error, 
       address: rawAddress, 
-      dataDirectory 
+      dataDirectory,
+      directoryLevels 
     }, 'Failed to save contract data');
     throw new Error(`Failed to save contract data for ${rawAddress}: ${error}`);
   }
@@ -94,5 +103,86 @@ export async function ensureDataDirectory(dataDirectory: string, logger: Logger)
   } catch (error) {
     logger.error({ error, dataDirectory }, 'Failed to ensure data directory');
     throw new Error(`Failed to create data directory: ${error}`);
+  }
+}
+
+/**
+ * Определяет оптимальное количество уровней директорий на основе текущих данных
+ */
+export async function determineOptimalDirectoryLevels(
+  dataDirectory: string,
+  logger: Logger,
+  estimatedTotalFiles?: number
+): Promise<number> {
+  try {
+    let fileCount = estimatedTotalFiles;
+    
+    if (!fileCount) {
+      // Подсчитываем текущие файлы
+      if (await fs.pathExists(dataDirectory)) {
+        const stats = await analyzeDirectoryDistribution(dataDirectory);
+        fileCount = stats.totalFiles;
+        
+        // Если файлов еще нет, берем консервативную оценку
+        if (fileCount === 0) {
+          fileCount = 100000; // По умолчанию планируем на 100к файлов
+        }
+      } else {
+        fileCount = 100000;
+      }
+    }
+    
+    const optimalLevels = calculateOptimalDirectoryLevels(fileCount);
+    
+    logger.info({
+      currentFileCount: fileCount,
+      optimalDirectoryLevels: optimalLevels,
+      expectedDirectories: Math.pow(256, optimalLevels),
+      avgFilesPerDirectory: Math.ceil(fileCount / Math.pow(256, optimalLevels))
+    }, 'Determined optimal directory structure');
+    
+    return optimalLevels;
+    
+  } catch (error) {
+    logger.error({ error, dataDirectory }, 'Failed to determine optimal directory levels');
+    // Возвращаем безопасное значение по умолчанию
+    return 2;
+  }
+}
+
+/**
+ * Анализирует текущую структуру данных и выводит статистику
+ */
+export async function analyzeCurrentDataStructure(
+  dataDirectory: string,
+  logger: Logger
+): Promise<void> {
+  try {
+    if (!(await fs.pathExists(dataDirectory))) {
+      logger.info({ dataDirectory }, 'Data directory does not exist yet');
+      return;
+    }
+    
+    const stats = await analyzeDirectoryDistribution(dataDirectory);
+    
+    logger.info({
+      totalFiles: stats.totalFiles,
+      totalDirectories: stats.totalDirectories,
+      averageFilesPerDirectory: parseFloat(stats.averageFilesPerDirectory.toFixed(2)),
+      maxFilesInDirectory: stats.maxFilesInDirectory,
+      minFilesInDirectory: stats.minFilesInDirectory,
+      recommendedLevels: calculateOptimalDirectoryLevels(stats.totalFiles)
+    }, 'Current data structure analysis');
+    
+    // Предупреждаем если есть переполненные директории
+    if (stats.maxFilesInDirectory > 1000) {
+      logger.warn({
+        maxFilesInDirectory: stats.maxFilesInDirectory,
+        threshold: 1000
+      }, 'Some directories exceed recommended file limit - consider migration');
+    }
+    
+  } catch (error) {
+    logger.error({ error, dataDirectory }, 'Failed to analyze data structure');
   }
 } 
