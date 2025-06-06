@@ -1,0 +1,27 @@
+{
+  "code": "b5ee9c72010101010023000842029e5038ab735973d5450fae1a14e7707b332dcd8e744f5dbb3b6a0d994d400c59",
+  "code_hash": "dac47636ae899081ebd4f47dc90ef9de98456b1000591069773f683c6d601fa9",
+  "methods": [
+    {
+      "id": 81689,
+      "method": "get_pool_data"
+    },
+    {
+      "id": 82492,
+      "method": "get_pool_type"
+    },
+    {
+      "id": 87316,
+      "method": "get_lp_account_address"
+    },
+    {
+      "id": 103289,
+      "method": "get_wallet_address"
+    },
+    {
+      "id": 106029,
+      "method": "get_jetton_data"
+    }
+  ],
+  "compiler": "func"
+}
