@@ -1,0 +1,19 @@
+{
+  "code": "b5ee9c72010101010023000842020f1ad3d8a46bd283321dde639195fb72602e9b31b1727fecc25e2edc10966df4",
+  "code_hash": "431e1485b326a1c600baf02dc3e4cb6339a1538a92ebc4e3ce5daa7100f6c79b",
+  "methods": [
+    {
+      "id": 97026,
+      "method": "get_wallet_data"
+    },
+    {
+      "id": 100881,
+      "method": "get_status"
+    },
+    {
+      "id": 122284,
+      "method": "is_claimed"
+    }
+  ],
+  "compiler": "func"
+}
