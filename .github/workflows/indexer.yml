@@ -17,6 +17,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: ton-indexer
+  cancel-in-progress: false
+
 jobs:
   index:
     runs-on: ubuntu-latest
