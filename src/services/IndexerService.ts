@@ -15,6 +15,8 @@ import {
   contractFileExists,
   saveContractData,
   ensureDataDirectory,
+  determineOptimalDirectoryLevels,
+  analyzeCurrentDataStructure,
 } from '../utils/fileUtils';
 import { AddressFilter, createDefaultAddressFilterConfig } from '../utils/addressFilter';
 
@@ -28,6 +30,7 @@ export class IndexerService {
   private logger: Logger;
   private limit: ReturnType<typeof pLimit>;
   private addressFilter: AddressFilter;
+  private directoryLevels: number;
 
   constructor(config: IndexerConfig, logger: Logger) {
     this.config = config;
@@ -43,6 +46,9 @@ export class IndexerService {
     
     // Set up concurrency limit for parallel processing
     this.limit = pLimit(config.maxConcurrentRequests);
+
+    // Initialize directory levels (will be determined during runtime)
+    this.directoryLevels = 2; // Default fallback
 
     this.logger.info({
       maxConcurrentRequests: config.maxConcurrentRequests,
@@ -82,6 +88,15 @@ export class IndexerService {
 
     // Ensure data directory exists
     await ensureDataDirectory(this.config.dataDirectory, this.logger);
+
+    // Determine optimal directory levels and analyze current structure
+    this.directoryLevels = await determineOptimalDirectoryLevels(
+      this.config.dataDirectory, 
+      this.logger
+    );
+    
+    // Analyze current data structure for insights
+    await analyzeCurrentDataStructure(this.config.dataDirectory, this.logger);
 
     // Read current cursor
     const cursor = await readCursor(this.config.cursorFilePath, this.logger);
@@ -218,8 +233,12 @@ export class IndexerService {
         };
       }
 
-      // Check if file already exists
-      const fileExists = await contractFileExists(this.config.dataDirectory, rawAddress);
+      // Check if file already exists (using hierarchical structure)
+      const fileExists = await contractFileExists(
+        this.config.dataDirectory, 
+        rawAddress,
+        this.directoryLevels
+      );
       
       if (fileExists) {
         this.logger.debug({ address: rawAddress }, 'Contract file already exists, skipping');
@@ -233,12 +252,13 @@ export class IndexerService {
       // Fetch contract data
       const contractData = await this.restClient.inspectContract(rawAddress);
 
-      // Save to file
+      // Save to file (using hierarchical structure)
       const filePath = await saveContractData(
         this.config.dataDirectory,
         rawAddress,
         contractData,
-        this.logger
+        this.logger,
+        this.directoryLevels
       );
 
       return {
