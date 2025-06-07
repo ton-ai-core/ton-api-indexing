@@ -3,7 +3,7 @@ name: TON Blockchain Indexer
 on:
   schedule:
     # Run every 15 minutes
-    - cron: '*/20 * * * *'
+    - cron: '*/15 * * * *'
   workflow_dispatch:
     # Allow manual trigger
     inputs:
