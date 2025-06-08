@@ -24,7 +24,6 @@ concurrency:
 jobs:
   index:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
     
     steps:
     - name: Checkout repository
