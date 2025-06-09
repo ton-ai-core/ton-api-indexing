@@ -80,7 +80,7 @@ jobs:
     - name: Stage changes
       id: changes
       run: |
-        git add data/ cursor.txt
+        git add --sparse data/ cursor.txt
         if git diff --staged --quiet; then
           echo "has_changes=false" >> "$GITHUB_OUTPUT"
           echo "📝 No changes to commit"
