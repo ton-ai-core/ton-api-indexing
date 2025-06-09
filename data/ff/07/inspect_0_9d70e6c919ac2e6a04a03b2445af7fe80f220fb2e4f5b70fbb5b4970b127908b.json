@@ -4,6 +4,14 @@
   "code_hash": "feb5ff6820e2ff0d9483e7e0d62c817d846789fb4ae580c878866d959dabd5c0",
   "methods": [
     {
+      "id": 85143,
+      "method": "seqno"
+    },
+    {
+      "id": 107653,
+      "method": "get_plugin_list"
+    },
+    {
       "id": 76407,
       "method": "is_plugin_installed"
     },
@@ -14,14 +22,6 @@
     {
       "id": 81467,
       "method": "get_subwallet_id"
-    },
-    {
-      "id": 85143,
-      "method": "seqno"
-    },
-    {
-      "id": 107653,
-      "method": "get_plugin_list"
     }
   ],
   "compiler": "func",
