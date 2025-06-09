@@ -23,18 +23,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository (sparse, no data/)
+    # ------------------------------------------------------------------
+    # 1. Checkout repository — без старой папки data и без тяжёлых blob'ов
+    # ------------------------------------------------------------------
+    - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        fetch-depth: 1
-        persist-credentials: true
-        partial-clone: true
-        filter: "blob:none"
+        fetch-depth: 1            # только последний коммит
+        persist-credentials: true # нужен токен для push
+        filter: "blob:none"       # partial-clone (без blob-объектов)
         sparse-checkout: |
           /*
-          !/data
+          !/data                  # исключаем старую data
         sparse-checkout-cone-mode: false
 
+    # ------------------------------------------------------------------
+    # 2. Runtime setup
+    # ------------------------------------------------------------------
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -46,48 +51,61 @@ jobs:
 
     - name: Configure Git
       run: |
-        git config --global user.name 'TON Indexer Bot'
-        git config --global user.email 'indexer@github-actions.local'
+        git config --global user.name  "TON Indexer Bot"
+        git config --global user.email "indexer@github-actions.local"
 
+    # ------------------------------------------------------------------
+    # 3. Prepare environment and folders
+    # ------------------------------------------------------------------
     - name: Create .env file
       run: |
-        echo "TONAPI_KEY=AFPJTKEBPOX3AIYAAAAKA2HWOTRNJP5MUCV5DMDCZAAOCPSAYEYS3CILNQVLF2HWKED6USY" > .env
-        echo "LOG_LEVEL=info" >> .env
-        echo "LOG_PRETTY=false" >> .env
-        echo "MAX_CONCURRENT_REQUESTS=3" >> .env
-        echo "ACCOUNTS_PER_PAGE=50" >> .env
-        echo "REQUEST_DELAY_MS=100" >> .env
+        cat <<EOF > .env
+        TONAPI_KEY=AFPJTKEBPOX3AIYAAAAKA2HWOTRNJP5MUCV5DMDCZAAOCPSAYEYS3CILNQVLF2HWKED6USY
+        LOG_LEVEL=info
+        LOG_PRETTY=false
+        MAX_CONCURRENT_REQUESTS=3
+        ACCOUNTS_PER_PAGE=50
+        REQUEST_DELAY_MS=100
+        EOF
 
     - name: Ensure data directory exists
       run: mkdir -p data
 
-    - name: Run TON Indexer (Timed Mode)
+    # ------------------------------------------------------------------
+    # 4. Run indexer (timed)
+    # ------------------------------------------------------------------
+    - name: Run TON Indexer (timed mode)
       run: |
         DURATION=${{ github.event.inputs.duration_minutes || '9' }}
-        echo "🚀 Starting TON indexer for ${DURATION} minutes..."
+        echo "🚀 Starting TON indexer for ${DURATION} minutes…"
         npm run build
-        timeout $((DURATION * 60)) node dist/index.js timed ${DURATION} || echo "⏰ Indexer completed (timeout or finished)"
+        timeout $((DURATION * 60)) node dist/index.js timed "${DURATION}" \
+          || echo "⏰ Indexer finished (timeout or graceful exit)"
 
-    - name: Check for changes
+    # ------------------------------------------------------------------
+    # 5. Stage changes
+    # ------------------------------------------------------------------
+    - name: Stage changes
       id: changes
       run: |
-        git fetch origin main
-        git rebase origin/main
-
         git add data/ cursor.txt
         if git diff --staged --quiet; then
-          echo "has_changes=false" >> $GITHUB_OUTPUT
+          echo "has_changes=false" >> "$GITHUB_OUTPUT"
           echo "📝 No changes to commit"
         else
-          echo "has_changes=true" >> $GITHUB_OUTPUT
+          echo "has_changes=true"  >> "$GITHUB_OUTPUT"
           echo "📝 Changes detected"
         fi
 
-    - name: Commit and push changes
+    # ------------------------------------------------------------------
+    # 6. Commit, clean untracked, rebase, push
+    # ------------------------------------------------------------------
+    - name: Commit → clean → rebase → push
       if: steps.changes.outputs.has_changes == 'true'
       run: |
-        DATA_FILES=$(find data -name "*.json" | wc -l)
-        NEW_FILES=$(git diff --staged --name-only --diff-filter=A | grep -E "\.json$" | wc -l)
+        # ---------- commit ----------
+        DATA_FILES=$(find data -name '*.json' | wc -l)
+        NEW_FILES=$(git diff --staged --name-only --diff-filter=A | wc -l)
         CURSOR_UPDATED=$(git diff --staged --name-only | grep -c cursor.txt)
         TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
 
@@ -96,22 +114,30 @@ jobs:
           echo
           echo "📊 Stats:"
           echo "- Total contract files: ${DATA_FILES}"
-          echo "- New contracts in this run: ${NEW_FILES}"
+          echo "- New contracts this run: ${NEW_FILES}"
           echo "- Cursor updated: $([ ${CURSOR_UPDATED} -eq 1 ] && echo 'Yes' || echo 'No')"
           echo
           echo "Generated by GitHub Actions workflow"
         )
-
         git commit -m "$COMMIT_MSG"
+
+        # ---------- ensure clean working tree ----------
+        git clean -fd           # удаляем все untracked (в т.ч. .env), иначе rebase не начнётся
+
+        # ---------- integrate upstream ----------
+        git pull --rebase --autostash origin main
+
+        # ---------- push ----------
         git push --force-with-lease
 
-    - name: Log indexing summary
+    # ------------------------------------------------------------------
+    # 7. Summary (всегда)
+    # ------------------------------------------------------------------
+    - name: Indexing summary
       if: always()
       run: |
         echo "📈 Indexing Summary:"
-        echo "- Total JSON files: $(find data -name "*.json" | wc -l 2>/dev/null || echo 0)"
+        echo "- Total JSON files: $(find data -name '*.json' | wc -l || echo 0)"
         echo "- Data directory size: $(du -sh data 2>/dev/null | cut -f1 || echo '0B')"
         echo "- Cursor file exists: $([ -f cursor.txt ] && echo 'Yes' || echo 'No')"
-        if [ -f cursor.txt ]; then
-          echo "- Current cursor: $(cat cursor.txt 2>/dev/null || echo 'empty')"
-        fi
+        [ -f cursor.txt ] && echo "- Current cursor: $(cat cursor.txt)"
