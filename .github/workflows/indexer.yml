@@ -23,23 +23,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # ------------------------------------------------------------------
-    # 1. Checkout repository — без старой папки data и без тяжёлых blob'ов
-    # ------------------------------------------------------------------
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        fetch-depth: 1            # только последний коммит
-        persist-credentials: true # нужен токен для push
-        filter: "blob:none"       # partial-clone (без blob-объектов)
+        fetch-depth: 1
+        persist-credentials: true
+        filter: 'blob:none'
         sparse-checkout: |
           /*
-          !/data                  # исключаем старую data
+          !/data
         sparse-checkout-cone-mode: false
 
-    # ------------------------------------------------------------------
-    # 2. Runtime setup
-    # ------------------------------------------------------------------
+    - name: Check disk usage after sparse checkout
+      run: |
+        echo "After sparse checkout:"
+        df -h /
+        echo "Root directory contents:"
+        ls -d */
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -54,9 +55,6 @@ jobs:
         git config --global user.name  "TON Indexer Bot"
         git config --global user.email "indexer@github-actions.local"
 
-    # ------------------------------------------------------------------
-    # 3. Prepare environment and folders
-    # ------------------------------------------------------------------
     - name: Create .env file
       run: |
         cat <<EOF > .env
@@ -71,9 +69,6 @@ jobs:
     - name: Ensure data directory exists
       run: mkdir -p data
 
-    # ------------------------------------------------------------------
-    # 4. Run indexer (timed)
-    # ------------------------------------------------------------------
     - name: Run TON Indexer (timed mode)
       run: |
         DURATION=${{ github.event.inputs.duration_minutes || '9' }}
@@ -82,9 +77,6 @@ jobs:
         timeout $((DURATION * 60)) node dist/index.js timed "${DURATION}" \
           || echo "⏰ Indexer finished (timeout or graceful exit)"
 
-    # ------------------------------------------------------------------
-    # 5. Stage changes
-    # ------------------------------------------------------------------
     - name: Stage changes
       id: changes
       run: |
@@ -97,13 +89,9 @@ jobs:
           echo "📝 Changes detected"
         fi
 
-    # ------------------------------------------------------------------
-    # 6. Commit, clean untracked, rebase, push
-    # ------------------------------------------------------------------
     - name: Commit → clean → rebase → push
       if: steps.changes.outputs.has_changes == 'true'
       run: |
-        # ---------- commit ----------
         DATA_FILES=$(find data -name '*.json' | wc -l)
         NEW_FILES=$(git diff --staged --name-only --diff-filter=A | wc -l)
         CURSOR_UPDATED=$(git diff --staged --name-only | grep -c cursor.txt)
@@ -121,18 +109,12 @@ jobs:
         )
         git commit -m "$COMMIT_MSG"
 
-        # ---------- ensure clean working tree ----------
-        git clean -fd           # удаляем все untracked (в т.ч. .env), иначе rebase не начнётся
+        git clean -fd
 
-        # ---------- integrate upstream ----------
         git pull --rebase --autostash origin main
 
-        # ---------- push ----------
         git push --force-with-lease
 
-    # ------------------------------------------------------------------
-    # 7. Summary (всегда)
-    # ------------------------------------------------------------------
     - name: Indexing summary
       if: always()
       run: |
