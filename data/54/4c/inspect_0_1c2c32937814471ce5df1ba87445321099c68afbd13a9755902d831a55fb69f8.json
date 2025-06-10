@@ -1,0 +1,19 @@
+{
+  "code": "b5ee9c720101010100230008420259c045c54ce553a0f4c4327fb83365225b88e99f4336a02e9590247e2acbe419",
+  "code_hash": "d292c0794a371fbb2266970f5645899d090732dedd983b9db1a32cf32425466b",
+  "methods": [
+    {
+      "id": 97026,
+      "method": "get_wallet_data"
+    },
+    {
+      "id": 100881,
+      "method": "get_status"
+    },
+    {
+      "id": 128979,
+      "method": "jetton_wallet_lock_data"
+    }
+  ],
+  "compiler": "func"
+}
