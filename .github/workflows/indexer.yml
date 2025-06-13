@@ -1,8 +1,6 @@
 name: TON Blockchain Indexer
 
 on:
-  schedule:
-    - cron: '*/15 * * * *'
   workflow_dispatch:
     inputs:
       duration_minutes:
